@@ -7,7 +7,7 @@ const Schema = mongoose.Schema;
 //const mongoURI = 'mongodb://localhost:27017/';
 const mongoURI = 'mongodb+srv://zheng:123@test.ojgb3ty.mongodb.net/?retryWrites=true&w=majority&appName=Test';
 const db = 'luggageprioritydb';
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname)));
 
 
 const flightSchema = new Schema({
