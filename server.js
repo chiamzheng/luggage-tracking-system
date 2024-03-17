@@ -2,43 +2,63 @@ const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path'); 
 const app = express();
-const MongoClient = require('mongodb').MongoClient;
-const mongoURI = 'mongodb://localhost:27017/';
-const dbName = 'luggageprioritydb';
+//const MongoClient = require('mongodb').MongoClient;
+const Schema = mongoose.Schema;
+//const mongoURI = 'mongodb://localhost:27017/';
+const mongoURI = 'mongodb+srv://zheng:123@test.ojgb3ty.mongodb.net/?retryWrites=true&w=majority&appName=Test';
+const db = 'luggageprioritydb';
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Connect to MongoDB using MongoClient
-MongoClient.connect(mongoURI)
-  .then(client => {
-    console.log('Connected to MongoDB');
-    const db = client.db(dbName);
 
+const flightSchema = new Schema({
+  flight_id: Number,
+  belt_no: Number,
+  priority_track: Number,
+  norm_track: Number,
+  flight_name: String
+});
 
-    app.get('/', (req, res) => {
-      res.send('Welcome to Flight Tracking App, please use the provided QR code'); // Send a welcome message or render a homepage HTML here
-    });
+const passengerSchema = new Schema({
+  passenger_id: Number,
+  flight_id: Number,
+  priority_q: Boolean,
+  name: String
+});
+
+const Passenger = mongoose.model('Passenger', passengerSchema,'passenger_info');
+const Flight = mongoose.model('Flight', flightSchema,'flight_info');
+
+mongoose.connect(mongoURI,{dbName: db})
+.then(() => {
+  console.log('Connected to MongoDB');
+})
+.catch(err => {
+  console.error('Error connecting to MongoDB:', err);
+});
+
+app.get('/', (req, res) => {
+  res.send('Welcome to Flight Tracking App, please use the provided QR code'); // Send a welcome message or render a homepage HTML here
+});
 
 
     app.get('/:passengerId', async (req, res) => {//extract id and display information from db
         try {
           const passengerId = parseInt(req.params.passengerId, 10); // Parse as base-10 integer
-          const passengerInfoCollection = db.collection('passenger_info');
-          const flightInfoCollection = db.collection('flight_info');
-      
-          const passengerInfo = await passengerInfoCollection.findOne({ passenger_id: passengerId });
+         // const { passengerId } = req.params;
+          const passengerInfo = await Passenger.findOne({ passenger_id: passengerId });
           if (!passengerInfo) {
             return res.status(404).send('Passenger not found');
-          }
-      
-          const { flight_id, priority_q } = passengerInfo;
-          let trackingType = priority_q ? 'priority_track' : 'norm_track'; // choose which tracking to follow
-      
-          const flightInfo = await flightInfoCollection.findOne({ flight_id });
+            }
+
+          const { flight_id, priority_q ,name} = passengerInfo;
+          const trackingType = priority_q ? 'priority_track' : 'norm_track';
+
+          const flightInfo = await Flight.findOne({ flight_id });
           if (!flightInfo) {
             return res.status(404).send('Flight not found');
           }
-      
-          const { belt_no, [trackingType]: tracking_progress,flight_name } = flightInfo;
+
+          const { belt_no, [trackingType]: tracking_progress, flight_name } = flightInfo;
 
           // Generate HTML content
           const htmlContent = `
@@ -55,6 +75,7 @@ MongoClient.connect(mongoURI)
             <body>
               <div class="container">
                 <h1>Flight Information</h1>
+                <h2>Hi ${name}</h2>
                 <div id="flightInfo">
                   <p><strong>Flight:</strong> ${flight_name}</p>
                   <p><strong>Belt No:</strong> ${belt_no}</p>
@@ -94,8 +115,6 @@ MongoClient.connect(mongoURI)
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
-  })
-  .catch(err => {
-    console.error('Error connecting to MongoDB:', err);
-  });
+
+  
 
