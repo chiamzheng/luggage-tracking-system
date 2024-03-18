@@ -1,27 +1,22 @@
-// Define a function to fetch data from the server and update HTML
-async function fetchDataAndUpdate() {
-    try {
-        const passengerId = extractPassengerIdFromUrl();
-        if (!passengerId) {
-            throw new Error('Passenger ID not found in URL');
-        }
+// Dynamically set WebSocket server address based on window location
+const socketUrl = `ws://${window.location.hostname}:${window.location.port}`;
 
-        const response = await fetch(`/${passengerId}`);
-        const data = await response.json();
+// Create a WebSocket connection
+const socket = new WebSocket(socketUrl);
 
-        // Update DOM elements with fetched data
-        document.getElementById('flightId').textContent = data.flight_id;
-        document.getElementById('beltNo').textContent = data.belt_no;
-        document.getElementById('trackingProgress').textContent = data.tracking_progress + '%';
+socket.onopen = function () {
+  console.log('WebSocket Client Connected');
+};
 
-        // Update order tracking status based on tracking progress
-        updateOrderTracking(data.tracking_progress);
-    } catch (err) {
-        console.error('Error fetching data:', err);
-    }
-}
+socket.onmessage = function (event) {
+  console.log('Received: ', event.data);
+  const data = JSON.parse(event.data); // Assuming data is sent as JSON
 
-// Poll the server at intervals (e.g., every 5 seconds) to check for updates
-setInterval(fetchDataAndUpdate, 5000); // 5000 milliseconds = 5 seconds
+  // Update DOM elements with received data
+  document.getElementById('passengerName').textContent = 'Hi ' + data.name;
+  document.getElementById('flightName').textContent = data.flight_name;
+  document.getElementById('beltNo').textContent = data.belt_no;
+  document.getElementById('trackingProgress').textContent = data.tracking_progress + '%';
+};
 
 
