@@ -7,6 +7,20 @@ const Schema = mongoose.Schema;
 //const mongoURI = 'mongodb://localhost:27017/';
 const mongoURI = 'mongodb+srv://zheng:123@test.ojgb3ty.mongodb.net/?retryWrites=true&w=majority&appName=Test';
 const db = 'luggageprioritydb';
+const WebSocket = require('ws');
+const http = require('http');
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
+
+wss.on('connection', function connection(ws) {
+  ws.on('message', function incoming(message) {
+    console.log('received: %s', message);
+  });
+  // Example: Send message to connected clients
+  ws.send('Connected to WebSocket server');
+});
+
+
 app.use(express.static(path.join(__dirname)));
 
 
@@ -27,6 +41,39 @@ const passengerSchema = new Schema({
 
 const Passenger = mongoose.model('Passenger', passengerSchema,'passenger_info');
 const Flight = mongoose.model('Flight', flightSchema,'flight_info');
+
+
+// Inside setupChangeStreams() function
+
+function setupChangeStreams() {
+  const changeStream = Flight.watch();
+
+  changeStream.on('change', async (change) => {
+    if (change.operationType === 'update') {
+      try {
+        const flightData = await Flight.findOne({ flight_id: change.documentKey.flight_id });
+        const passengerData = await Passenger.findOne({ flight_id: change.documentKey.flight_id });
+
+        if (flightData && passengerData) {
+          const dataToSend = {
+            name: passengerData.name,
+            flight_name: flightData.flight_name,
+            belt_no: flightData.belt_no,
+            tracking_progress: passengerData.priority_q ? flightData.priority_track : flightData.norm_track,
+          };
+
+          // Send updated data to all connected WebSocket clients
+          wss.clients.forEach(client => {
+            client.send(JSON.stringify(dataToSend));
+          });
+        }
+      } catch (err) {
+        console.error('Error fetching data:', err);
+      }
+    }
+  });
+}
+
 
 mongoose.connect(mongoURI,{dbName: db})
 .then(() => {
@@ -62,46 +109,45 @@ app.get('/', (req, res) => {
 
           // Generate HTML content
           const htmlContent = `
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-              <meta charset="UTF-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>Flight Tracking</title>
-              <link rel="stylesheet" href="/styles.css">
-              <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-              <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-            </head>
-            <body>
-              <div class="container">
-                <h1>Flight Information</h1>
-                <h2>Hi ${name}</h2>
-                <div id="flightInfo">
-                  <p><strong>Flight:</strong> ${flight_name}</p>
-                  <p><strong>Belt No:</strong> ${belt_no}</p>
-                  <p><strong>Tracking Progress:</strong> ${tracking_progress}%</p>
-                </div>
-                  <div class="container">
-                      <div class="row justify-content-between">
-                          <div class="col-sm-4 order-tracking completed">
-                              <span class="is-complete"></span>
-                              <p>Landed<br><span>Mon, June 24</span></p>
-                          </div>
-                          <div class="col-sm-4 order-tracking completed">
-                              <span class="is-complete"></span>
-                              <p>Luggage Unloaded<br><span>Tue, June 25</span></p>
-                          </div>
-                          <div class="col-sm-4 order-tracking">
-                              <span class="is-complete"></span>
-                              <p>Ready for collection<br><span>Fri, June 28</span></p>
-                              </div>
-                          </div>
-                    </div>
-                 </div>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Flight Tracking</title>
+            <link rel="stylesheet" href="/styles.css">
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+          </head>
+          <body>
+            <div class="container">
+              <h1>Flight Information</h1>
+              <h2>Hi ${name}</h2>
+              <div id="flightInfo">
+                <p><strong>Flight:</strong> <span id="flightName">${flight_name}</span></p>
+                <p><strong>Belt No:</strong> <span id="beltNo">${belt_no}</span></p>
+                <p><strong>Tracking Progress:</strong> <span id="trackingProgress">${tracking_progress}%</span></p>
               </div>
-              <script src="script.js"></script>
-            </body>
-            </html>
+              <div class="container">
+                <div class="row justify-content-between">
+                  <div class="col-sm-4 order-tracking completed">
+                    <span class="is-complete"></span>
+                    <p>Landed<br><span>Mon, June 24</span></p>
+                  </div>
+                  <div class="col-sm-4 order-tracking completed">
+                    <span class="is-complete"></span>
+                    <p>Luggage Unloaded<br><span>Tue, June 25</span></p>
+                  </div>
+                  <div class="col-sm-4 order-tracking">
+                    <span class="is-complete"></span>
+                    <p>Ready for collection<br><span>Fri, June 28</span></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <script src="script.js"></script>
+          </body>
+          </html>
           `;
 
           res.send(htmlContent); // Send the generated HTML as the response
