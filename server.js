@@ -9,7 +9,8 @@ const mongoURI = 'mongodb+srv://zheng:123@test.ojgb3ty.mongodb.net/?retryWrites=
 const db = 'luggageprioritydb';
 const WebSocket = require('ws');
 const http = require('http');
-const server = http.createServer(app);
+const https = require('https');
+const server = https.createServer(app);
 const wss = new WebSocket.Server({ server });
 const numericPattern = '\\d+';
 let globalpid = 0;
@@ -402,7 +403,7 @@ try{
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
     function setupWebSocket() {
-      const socketUrl = 'ws://luggage-tracking-system.onrender.com'; // specifically for render
+      const socketUrl = 'wss://luggage-tracking-system.onrender.com'; // specifically for render
       const socket = new WebSocket(socketUrl);
     
       socket.addEventListener('open', function (event) {
