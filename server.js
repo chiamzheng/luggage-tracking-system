@@ -326,7 +326,7 @@ async function handleFlightUpdate(trackType, newState, flightId) {
     throw new Error(error.message);
   }
 }
-app.get('/.well-known/pki-validation/D74BA1577716B698760D82186545C0E0.txt', async (req, res) => { // to update tracking
+app.get('/.well-known/pki-validation/, async (req, res) => { // to update tracking
   const filePath = path.join(__dirname, 'D74BA1577716B698760D82186545C0E0.txt');
   res.status(200).sendFile(filePath);
 });
