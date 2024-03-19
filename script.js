@@ -1,5 +1,5 @@
 // Dynamically set WebSocket server address based on window location
-const socketUrl = `ws://luggage-tracking-system.onrender.com`;
+const socketUrl = `ws://${window.location.hostname}:${window.location.port}`;
 
 // Create a WebSocket connection
 const socket = new WebSocket(socketUrl);
