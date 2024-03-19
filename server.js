@@ -399,7 +399,7 @@ try{
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
     function setupWebSocket() {
-      const socketUrl = 'ws://localhost:5000'; // Corrected URL format
+      const socketUrl = 'ws://luggage-tracking-system.onrender.com'; // specifically for render
       const socket = new WebSocket(socketUrl);
     
       socket.addEventListener('open', function (event) {
