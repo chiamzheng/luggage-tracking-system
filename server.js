@@ -328,7 +328,7 @@ async function handleFlightUpdate(trackType, newState, flightId) {
 }
 app.get('/.well-known/pki-validation/D74BA1577716B698760D82186545C0E0.txt', async (req, res) => { // to update tracking
   const filePath = path.join(__dirname, 'D74BA1577716B698760D82186545C0E0.txt');
-  res.sendFile(filePath);
+  res.status(200).sendFile(filePath);
 });
 
 app.get('/update/:flightId(' + numericPattern + ')', async (req, res) => {//extract id and display information from db Luggage tracking updater
