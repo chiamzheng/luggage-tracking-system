@@ -12,16 +12,39 @@ const http = require('http');
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 const numericPattern = '\\d+';
-let x = 0;
+let globalpid = 0;
+
 
 wss.on('connection', function connection(ws) {
   ws.on('message', function incoming(message) {
     console.log('received: %s', message);
-  });
-  // Example: Send message to connected clients
-  //ws.send(JSON.stringify({ message: 'Connected to WebSocket server' }));
 
+    // Here, the 'message' variable is correctly defined
+
+    try {
+      const { flightId, trackType, newState } = JSON.parse(message);
+      // Ensure flightId is valid (e.g., numeric) before proceeding
+      if (isNaN(flightId)) {
+        throw new Error('Invalid Flight ID');
+      }
+      // Call handleFlightUpdate with the parsed parameters
+      handleFlightUpdate(trackType, newState, flightId).then(() => {
+        console.log('Update successful');
+        // Send a success message to the client if needed
+        ws.send(JSON.stringify({ message: 'Update successful' }));
+      }).catch(err => {
+        console.error('Error updating flight:', err);
+        // Send an error message to the client if needed
+        ws.send(JSON.stringify({ error: err.message }));
+      });
+    } catch (error) {
+      console.error('Error parsing message:', error);
+      // Send an error message to the client if needed
+      ws.send(JSON.stringify({ error: 'Invalid message format' }));
+    }
+  });
 });
+
 
 
 app.use(express.static(path.join(__dirname)));
@@ -63,8 +86,8 @@ function setupChangeStreams() {
   changeStream.on('change', async (change) => {
     if (change.operationType === 'update') {
       try {
-        console.log('x is %d',x);
-        const passengerData = await Passenger.findOne({ passenger_id: x });
+        console.log('globalpid is %d',globalpid);
+        const passengerData = await Passenger.findOne({ passenger_id: globalpid });
         if (!passengerData) {
           console.error('Passenger not found');
           return;
@@ -118,7 +141,35 @@ mongoose.connect(mongoURI,{dbName: db})
 });
 
 app.get('/', (req, res) => {
-  res.send('Welcome to Flight Tracking App, please use the provided QR code'); // landing page
+  const htmlContent = `
+  
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Tracking</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Welcome to Flight Tracking App</h1>
+      <p>Please enter your Passenger ID:</p>
+      <form id="passengerForm">
+        <input type="text" id="passengerId" name="passengerId" placeholder="Enter Passenger ID">
+        <button type="submit">Go</button>
+      </form>
+    </div>
+  
+    <script src="landingscript.js"></script>
+  </body>
+  </html>
+  
+
+`;
+  res.send(htmlContent); // landing page
 });
 
 app.get('/:passengerId(' + numericPattern + ')', async (req, res) => {//extract id and display information from db
@@ -129,7 +180,7 @@ app.get('/:passengerId(' + numericPattern + ')', async (req, res) => {//extract 
       return res.status(400).send('Invalid passenger ID');
     }
    // const { passengerId } = req.params;
-    x = passengerId;
+    globalpid = passengerId;
     const passengerInfo = await Passenger.findOne({ passenger_id: passengerId });
     
 
@@ -200,16 +251,213 @@ app.get('/:passengerId(' + numericPattern + ')', async (req, res) => {//extract 
 
 app.get('/update', async (req, res) => { // to update tracking 
   try {
-
-
-
-
-  
-
-
+    const htmlContent = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Flight Tracking</title>
+      <link rel="stylesheet" href="/styles.css">
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    </head>
+    <body>
+      <div class="container">
+        <h1>Welcome to Flight Tracking App</h1>
+        <p>Please enter the Flight ID:</p>
+        <form id="flightForm">
+          <input type="text" id="flightId" name="flightId" placeholder="Enter Flight ID">
+          <button type="submit">Go</button>
+        </form>
+      </div>
+    
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          const form = document.getElementById('flightForm');
+          form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the default form submission
+    
+            const flightIdInput = document.getElementById('flightId');
+            const flightId = flightIdInput.value.trim();
+    
+            // Redirect to the desired URL using template literals
+            window.location.href = \`/update/\${flightId}\`;
+          });
+        });
+      </script>
+    </body>
+    </html>
+    `;
+    
+  res.send(htmlContent); // landing page
+    
   }catch (err) {
     console.error(err);
     res.status(500).send('Server Error');
   }
 });
+
+
+async function handleFlightUpdate(trackType, newState, flightId) {
+  try {
+    const updateQuery = { flight_id: flightId };
+    let updateField = {};
+    switch (trackType) {
+      case 'priority':
+        updateField = { priority_track: parseInt(newState) };
+        break;
+      case 'normal':
+        updateField = { norm_track: parseInt(newState) };
+        break;
+      default:
+        throw new Error('Invalid trackType');
+    }
+    const updatedFlight = await Flight.findOneAndUpdate(updateQuery, updateField, { new: true });
+
+    if (!updatedFlight) {
+      throw new Error('Flight not found to update');
+    }
+    // Send a message to WebSocket clients about the successful update
+    wss.clients.forEach(client => {
+      client.send(JSON.stringify({ message: 'Update successful' }));
+    });
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
+
+app.get('/update/:flightId(' + numericPattern + ')', async (req, res) => {//extract id and display information from db Luggage tracking updater
+try{
+  const flightId = parseInt(req.params.flightId, 10); // Parse as base-10 integer
+  if (isNaN(flightId)) {
+    return res.status(400).send('Invalid Flight ID');
+  }
+  const flightInfo = await Flight.findOne({ flight_id: flightId });
+  if (!flightInfo) {
+    return res.status(404).send('Flight not found');
+  }
+  console.log('Parsed flightId:', flightId); // Add this line for debugging
+
+  
+
+  const { priority_track,norm_track} = flightInfo;
+  const htmlContent = `
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flight Updating App</title>
+  <!-- Include Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <!-- Custom CSS -->
+  <style>
+    /* Add your custom styles here */
+    .btn-custom {
+      margin: 5px;
+      border: 1px solid #ccc;
+      background-color: #fff;
+      color: #333;
+      cursor: pointer;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .btn-custom:hover {
+      background-color: #f0f0f0;
+    }
+
+    .btn-custom.pressed {
+      background-color: green;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Flight Updater App</h1>
+    <div class="container p-3 mb-2 bg-primary bg-gradient text-white">Priority Tracker
+      <div id="priorityButtons">
+        <button class="btn btn-custom priority ${priority_track == 0 ? 'pressed' : ''}" data-state="0" data-track="priority">Reset</button>
+        <button class="btn btn-custom priority ${priority_track == 1 ? 'pressed' : ''}" data-state="1" data-track="priority">Landed</button>
+        <button class="btn btn-custom priority ${priority_track == 2 ? 'pressed' : ''}" data-state="2" data-track="priority">Unloaded</button>
+        <button class="btn btn-custom priority ${priority_track == 3 ? 'pressed' : ''}" data-state="3" data-track="priority">Ready</button>
+      </div>
+    </div>
+    <div class="container p-3 mb-2 bg-secondary bg-gradient text-white">Normal Tracker
+      <div id="normalButtons">
+        <button class="btn btn-custom normal ${norm_track == 0 ? 'pressed' : ''}" data-state="0" data-track="normal">Reset</button>
+        <button class="btn btn-custom normal ${norm_track == 1 ? 'pressed' : ''}" data-state="1" data-track="normal">Landed</button>
+        <button class="btn btn-custom normal ${norm_track == 2 ? 'pressed' : ''}" data-state="2" data-track="normal">Unloaded</button>
+        <button class="btn btn-custom normal ${norm_track == 3 ? 'pressed' : ''}" data-state="3" data-track="normal">Ready</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Include Bootstrap JS at the end of the body -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    function setupWebSocket() {
+      const socketUrl = 'ws://localhost:5000'; // Corrected URL format
+      const socket = new WebSocket(socketUrl);
+    
+      socket.addEventListener('open', function (event) {
+        console.log('WebSocket Connected');
+      });
+    
+      socket.addEventListener('message', function (event) {
+        console.log('Message from server:', event.data);
+        const message = JSON.parse(event.data);
+        
+        // Handle messages from the server
+        if (message.message === 'Update successful') {
+          // Reload the page after a successful update
+          location.reload();
+        }
+      });
+    
+      socket.addEventListener('close', function (event) {
+        console.log('WebSocket Closed');
+      });
+    
+      socket.addEventListener('error', function (event) {
+        console.error('WebSocket Error:', event);
+      });
+    
+      return socket; // Return the socket object for later use
+    }
+    
+    // Call the setupWebSocket function when the page loads
+    document.addEventListener('DOMContentLoaded', function () {
+      const socket = setupWebSocket();
+    
+      const buttons = document.querySelectorAll('.btn-custom');
+      buttons.forEach(button => {
+        button.addEventListener('click', () => {
+          const trackType = button.dataset.track;
+          const newState = button.getAttribute('data-state');
+          const flightId = '${flightId}'; 
+    
+          const data = { flightId, trackType, newState, type: 'data' };
+          socket.send(JSON.stringify(data));
+        });
+      });
+    });
+    </script>
+    </body>
+    </html>
+    `;
+
+    res.send(htmlContent);
+}catch (err) {
+  console.error(err);
+  res.status(500).send('Server Error');
+}
+});
+
+  
+
+
+  
 
