@@ -22,7 +22,7 @@ socket.onmessage = function (event) {
     document.getElementById('flightName').textContent = flightName;
     document.getElementById('beltNo').textContent = beltNo;
     document.getElementById('trackingProgress').textContent = trackingProgress + '%';
-    document.getElementById('passengerName').textContent = 'Hi ' + name;
+    document.getElementById('name').textContent = 'Hi ' + name;
   
     // Add other DOM updates as needed
   };

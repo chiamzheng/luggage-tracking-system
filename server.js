@@ -162,7 +162,7 @@ app.get('/:passengerId(' + numericPattern + ')', async (req, res) => {//extract 
     <body>
       <div class="container">
         <h1>Flight Information</h1>
-        <h2>Hi ${name}</h2>
+        <h2 id="name">Hi ${name}</h2>
         <div id="flightInfo">
           <p><strong>Flight:</strong> <span id="flightName">${flight_name}</span></p>
           <p><strong>Belt No:</strong> <span id="beltNo">${belt_no}</span></p>
