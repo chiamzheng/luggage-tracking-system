@@ -22,6 +22,27 @@ socket.onmessage = function (event) {
     document.getElementById('flightName').textContent = flightName;
     document.getElementById('beltNo').textContent = beltNo;
     document.getElementById('trackingProgress').textContent = trackingProgress + '%';
+    if (trackingProgress == 3) {
+      document.getElementById('landed').classList.add('completed');
+      document.getElementById('unloaded').classList.add('completed');
+      document.getElementById('ready').classList.add('completed');
+    } 
+    if (trackingProgress == 2) {
+      document.getElementById('landed').classList.add('completed');
+      document.getElementById('unloaded').classList.add('completed');  
+      document.getElementById('ready').classList.remove('completed');      
+    }
+    if (trackingProgress == 1) {
+      document.getElementById('landed').classList.add('completed');
+      document.getElementById('unloaded').classList.remove('completed');  
+      document.getElementById('ready').classList.remove('completed');      
+    }
+    if (trackingProgress == 0) {
+      document.getElementById('landed').classList.remove('completed');
+      document.getElementById('unloaded').classList.remove('completed');  
+      document.getElementById('ready').classList.remove('completed');  
+    }
+    
     document.getElementById('name').textContent = 'Hi ' + name;
   
     // Add other DOM updates as needed

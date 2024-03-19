@@ -170,15 +170,15 @@ app.get('/:passengerId(' + numericPattern + ')', async (req, res) => {//extract 
         </div>
         <div class="container">
           <div class="row justify-content-between">
-            <div class="col-sm-4 order-tracking completed">
+            <div id="landed" class="col-sm-4 order-tracking ${tracking_progress >= 1 ? 'completed' : ''}">
               <span class="is-complete"></span>
               <p>Landed<br><span>Mon, June 24</span></p>
             </div>
-            <div class="col-sm-4 order-tracking completed">
+            <div id="unloaded" class="col-sm-4 order-tracking ${tracking_progress >= 2 ? 'completed' : ''}">
               <span class="is-complete"></span>
               <p>Luggage Unloaded<br><span>Tue, June 25</span></p>
             </div>
-            <div class="col-sm-4 order-tracking">
+            <div id="ready" class="col-sm-4 order-tracking ${tracking_progress >= 3 ? 'completed' : ''}">
               <span class="is-complete"></span>
               <p>Ready for collection<br><span>Fri, June 28</span></p>
             </div>
@@ -198,7 +198,8 @@ app.get('/:passengerId(' + numericPattern + ')', async (req, res) => {//extract 
 });
 
 
-
+app.get('/update', async (req, res) => { // to update tracking 
+  try {
 
 
 
@@ -206,5 +207,9 @@ app.get('/:passengerId(' + numericPattern + ')', async (req, res) => {//extract 
   
 
 
-  
+  }catch (err) {
+    console.error(err);
+    res.status(500).send('Server Error');
+  }
+});
 
