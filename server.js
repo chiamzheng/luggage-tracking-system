@@ -158,8 +158,8 @@ app.get('/', (req, res) => {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
   </head>
   <body>
-    <div class="container">
-      <h1>Welcome to the Luggage Tracking App</h1>
+    <div class="container p-3 mb-2 bg-secondary text-white">
+      <h1>Welcome to Luggage Tracking App</h1>
       <p>Please enter your Passenger ID:</p>
       <form id="passengerForm">
         <input type="text" id="passengerId" name="passengerId" placeholder="Enter Passenger ID">
@@ -194,7 +194,7 @@ app.get('/:passengerId(' + numericPattern + ')', async (req, res) => {//extract 
 
     const { flight_id, priority_q ,name} = passengerInfo;
     const trackingType = priority_q ? 'priority_track' : 'norm_track';
-    const timeType = priority_q ? 'lastupdatednorm':'lastupdatednorm';
+    const timeType = priority_q ? 'lastupdatedpriority':'lastupdatednorm';
     const flightInfo = await Flight.findOne({ flight_id });
     if (!flightInfo) {
       return res.status(404).send('Flight not found');
@@ -215,27 +215,29 @@ app.get('/:passengerId(' + numericPattern + ')', async (req, res) => {//extract 
       <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     </head>
     <body>
-      <div class="container">
+      <div class="container p-3 mb-2 bg-secondary text-white">
         <h1>Flight Information</h1>
-        <h2 id="name">Hi ${name}</h2>
         <div id="flightInfo">
+          <p style="font-size: 1.5rem;"><u> Welcome <span id="name"><strong>${name}</strong></span></u></p>
           <p><strong>Flight:</strong> <span id="flightName">${flight_name}</span></p>
           <p><strong>Belt No:</strong> <span id="beltNo">${belt_no}</span></p>
-          <p><strong>Tracking Stage:</strong> <span id="trackingProgress">${tracking_progress}</span></p>
+          <!-- <p><strong>Tracking Stage:</strong> <span id="trackingProgress">${tracking_progress}</span></p> -->
         </div>
-        <div class="container">
+        <div class="container p-3 mb-2 bg-white text-dark">
           <div class="row justify-content-between">
             <div id="landed" class="col-sm-4 order-tracking ${tracking_progress >= 1 ? 'completed' : ''}">
               <span class="is-complete"></span>
-              <p>Landed<br><span id="landedtime">${updatetime[1]}</span></p>
+              
+              <p>Landed<br><span id="landedtime" style="display: ${tracking_progress >= 1 ? 'block': 'none'};">${updatetime[1]}</span></p>
             </div>
             <div id="unloaded" class="col-sm-4 order-tracking ${tracking_progress >= 2 ? 'completed' : ''}">
               <span class="is-complete"></span>
-              <p>Luggage Unloaded<br><span id="unloadtime">${updatetime[2]}</span></p>
+              <p>Luggage Unloaded<br><span id="unloadtime" style="display: ${tracking_progress >= 2 ? 'block' : 'none'};">${updatetime[2]}</span></p>
             </div>
             <div id="ready" class="col-sm-4 order-tracking ${tracking_progress >= 3 ? 'completed' : ''}">
               <span class="is-complete"></span>
-              <p>Ready for collection<br><span id= "collecttime">${updatetime[3]}</span></p>
+              <p>Ready for collection<br><span id="collecttime" style="display: ${tracking_progress >= 3 ? 'block' : 'none'};">${updatetime[3]}</span></p>
+
             </div>
           </div>
         </div>
@@ -261,7 +263,7 @@ app.get('/update', async (req, res) => { // to update tracking
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Flight Updater</title>
+      <title>Flight Tracking</title>
       <link rel="stylesheet" href="/styles.css">
       <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     </head>
@@ -347,14 +349,14 @@ try{
 
   
 
-  const { priority_track,norm_track, flight_name} = flightInfo;
+  const { priority_track,norm_track,flight_name} = flightInfo;
   const htmlContent = `
   <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Flight Updater App</title>
+  <title>Luggage Updater App</title>
   <!-- Include Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
   <!-- Custom CSS -->
@@ -381,8 +383,12 @@ try{
 </head>
 <body>
   <div class="container">
-    <h1>Luggage Updater App</h1>
-    <h2>You are currently updating Flight: ${flight_name} </h2>
+    <div class="p-3 border border-info rounded-end rounded-start">
+      <h1>Luggage Updater App</h1>
+      <h2 style="font-size: 1rem;">You are currently updating Flight: ${flight_name}</h2>
+    </div>
+    
+    
     <div class="container p-3 mb-2 bg-primary bg-gradient text-white">Priority Tracker
       <div id="priorityButtons">
         <button class="btn btn-custom priority ${priority_track == 0 ? 'pressed' : ''}" data-state="0" data-track="priority">Reset</button>
