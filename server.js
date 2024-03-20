@@ -152,14 +152,14 @@ app.get('/', (req, res) => {
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flight Tracking</title>
+    <title>Luggage Tracking</title>
     <link rel="stylesheet" href="/styles.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
   </head>
   <body>
     <div class="container">
-      <h1>Welcome to Flight Tracking App</h1>
+      <h1>Welcome to the Luggage Tracking App</h1>
       <p>Please enter your Passenger ID:</p>
       <form id="passengerForm">
         <input type="text" id="passengerId" name="passengerId" placeholder="Enter Passenger ID">
@@ -209,7 +209,7 @@ app.get('/:passengerId(' + numericPattern + ')', async (req, res) => {//extract 
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Flight Tracking</title>
+      <title>Luggage Tracking</title>
       <link rel="stylesheet" href="/styles.css">
       <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
       <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
@@ -261,13 +261,13 @@ app.get('/update', async (req, res) => { // to update tracking
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Flight Tracking</title>
+      <title>Luggage Tracking</title>
       <link rel="stylesheet" href="/styles.css">
       <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     </head>
     <body>
       <div class="container">
-        <h1>Welcome to Flight Tracking App</h1>
+        <h1>Welcome to Luggage Tracking App</h1>
         <p>Please enter the Flight ID:</p>
         <form id="flightForm">
           <input type="text" id="flightId" name="flightId" placeholder="Enter Flight ID">
@@ -346,7 +346,7 @@ try{
   if (!flightInfo) {
     return res.status(404).send('Flight not found');
   }
-  console.log('Parsed flightId:', flightId); // Add this line for debugging
+  console.log('Parsed flightId:', flightId,flight_name); // Add this line for debugging
 
   
 
@@ -384,7 +384,8 @@ try{
 </head>
 <body>
   <div class="container">
-    <h1>Flight Updater App</h1>
+    <h1>Luggage Updater App</h1>
+    <h2>You are currently updating Flight: ${flight_name} </h2>
     <div class="container p-3 mb-2 bg-primary bg-gradient text-white">Priority Tracker
       <div id="priorityButtons">
         <button class="btn btn-custom priority ${priority_track == 0 ? 'pressed' : ''}" data-state="0" data-track="priority">Reset</button>
