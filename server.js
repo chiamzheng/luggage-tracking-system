@@ -9,7 +9,7 @@ const mongoURI = 'mongodb+srv://zheng:123@test.ojgb3ty.mongodb.net/?retryWrites=
 const db = 'luggageprioritydb';
 const WebSocket = require('ws');
 const http = require('http');
-const server = https.createServer(app);
+const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 const numericPattern = '\\d+';
 let globalpid = 0;
