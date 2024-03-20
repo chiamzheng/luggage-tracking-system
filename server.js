@@ -331,7 +331,10 @@ async function handleFlightUpdate(trackType, newState, flightId) {
     throw new Error(error.message);
   }
 }
-
+app.get('/.well-known/pki-validation/AD3B94C6347A03FA85A754DCC2112D1B.txt', (req, res) => {
+  const filePath = path.join(__dirname, '.well-known', 'pki-validation', 'AD3B94C6347A03FA85A754DCC2112D1B.txt');
+  res.status(200).sendFile(filePath);
+});
 
 app.get('/update/:flightId(' + numericPattern + ')', async (req, res) => {//extract id and display information from db Luggage tracking updater
 try{
@@ -404,7 +407,9 @@ try{
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
     function setupWebSocket() {
-      const socketUrl = 'ws://localhost:5000'; // Corrected URL format
+
+
+      const socketUrl = 'wss://luggage-tracking-system.onrender.com'; // specifically for render
       const socket = new WebSocket(socketUrl);
     
       socket.addEventListener('open', function (event) {
