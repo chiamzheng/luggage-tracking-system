@@ -10,7 +10,7 @@ socket.onopen = function () {
 
 socket.onmessage = function (event) {
   console.log('Received: ', event.data);
-  //const data = JSON.parse(event.data); // Parse received JSON data
+  const data = JSON.parse(event.data); // Parse received JSON data
   
   // Ensure proper data types
   const name = data.name; // String
