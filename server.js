@@ -9,6 +9,7 @@ const mongoURI = 'mongodb+srv://zheng:123@test.ojgb3ty.mongodb.net/?retryWrites=
 const db = 'luggageprioritydb';
 const WebSocket = require('ws');
 const http = require('http');
+const { time } = require('console');
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 const numericPattern = '\\d+';
@@ -55,7 +56,9 @@ const flightSchema = new Schema({
   belt_no: Number,
   priority_track: Number,
   norm_track: Number,
-  flight_name: String
+  flight_name: String,
+  lastupdatednorm: Array,
+  lastupdatedpriority: Array
 });
 
 const passengerSchema = new Schema({
@@ -95,21 +98,22 @@ function setupChangeStreams() {
 
         const { flight_id, priority_q ,name} = passengerData;
         const trackingType = priority_q ? 'priority_track' : 'norm_track';
-
+        const timeType = priority_q ? 'lastupdatedpriority':'lastupdatednorm';
         const flightData = await Flight.findOne({ flight_id });
         if (!flightData) {
           console.error('Flight not found');
           return; // Exit the function since we cannot continue without flight data
         }
 
-        const { belt_no, [trackingType]: tracking_progress, flight_name } = flightData
+        const { belt_no, [trackingType]: tracking_progress, flight_name, [timeType]:updatetime } = flightData
          
 
         const dataToSend = {
           name,
           flight_name,
           belt_no,
-          tracking_progress
+          tracking_progress,
+          updatetime
         };
 
             // Send updated data to all connected WebSocket clients
@@ -190,13 +194,13 @@ app.get('/:passengerId(' + numericPattern + ')', async (req, res) => {//extract 
 
     const { flight_id, priority_q ,name} = passengerInfo;
     const trackingType = priority_q ? 'priority_track' : 'norm_track';
-
+    const timeType = priority_q ? 'lastupdatednorm':'lastupdatednorm';
     const flightInfo = await Flight.findOne({ flight_id });
     if (!flightInfo) {
       return res.status(404).send('Flight not found');
     }
 
-    const { belt_no, [trackingType]: tracking_progress, flight_name } = flightInfo;
+    const { belt_no, [trackingType]: tracking_progress, flight_name, [timeType]:updatetime } = flightInfo;
 
     // Generate HTML content
     const htmlContent = `
@@ -217,21 +221,21 @@ app.get('/:passengerId(' + numericPattern + ')', async (req, res) => {//extract 
         <div id="flightInfo">
           <p><strong>Flight:</strong> <span id="flightName">${flight_name}</span></p>
           <p><strong>Belt No:</strong> <span id="beltNo">${belt_no}</span></p>
-          <p><strong>Tracking Progress:</strong> <span id="trackingProgress">${tracking_progress}%</span></p>
+          <p><strong>Tracking Stage:</strong> <span id="trackingProgress">${tracking_progress}</span></p>
         </div>
         <div class="container">
           <div class="row justify-content-between">
             <div id="landed" class="col-sm-4 order-tracking ${tracking_progress >= 1 ? 'completed' : ''}">
               <span class="is-complete"></span>
-              <p>Landed<br><span>Mon, June 24</span></p>
+              <p>Landed<br><span id="landedtime">${updatetime[1]}</span></p>
             </div>
             <div id="unloaded" class="col-sm-4 order-tracking ${tracking_progress >= 2 ? 'completed' : ''}">
               <span class="is-complete"></span>
-              <p>Luggage Unloaded<br><span>Tue, June 25</span></p>
+              <p>Luggage Unloaded<br><span id="unloadtime">${updatetime[2]}</span></p>
             </div>
             <div id="ready" class="col-sm-4 order-tracking ${tracking_progress >= 3 ? 'completed' : ''}">
               <span class="is-complete"></span>
-              <p>Ready for collection<br><span>Fri, June 28</span></p>
+              <p>Ready for collection<br><span id= "collecttime">${updatetime[3]}</span></p>
             </div>
           </div>
         </div>
@@ -302,13 +306,14 @@ app.get('/update', async (req, res) => { // to update tracking
 async function handleFlightUpdate(trackType, newState, flightId) {
   try {
     const updateQuery = { flight_id: flightId };
+    updatetime = new Date(); // Get current timestamp
     let updateField = {};
     switch (trackType) {
       case 'priority':
-        updateField = { priority_track: parseInt(newState) };
+        updateField = { priority_track: parseInt(newState),$set: { [`lastupdatedpriority.${parseInt(newState)}`]: updatetime } };
         break;
       case 'normal':
-        updateField = { norm_track: parseInt(newState) };
+        updateField = { norm_track: parseInt(newState), $set: { [`lastupdatednorm.${parseInt(newState)}`]: updatetime } };
         break;
       default:
         throw new Error('Invalid trackType');
