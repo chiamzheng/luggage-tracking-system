@@ -10,6 +10,8 @@ socket.onopen = function () {
 
 socket.onmessage = function (event) {
   console.log('Received: ', event.data);
+
+  
   const data = JSON.parse(event.data); // Parse received JSON data
   
   // Ensure proper data types
@@ -22,7 +24,6 @@ socket.onmessage = function (event) {
   // Update DOM elements with received data
   document.getElementById('flightName').textContent = flightName;
   document.getElementById('beltNo').textContent = beltNo;
-  document.getElementById('trackingProgress').textContent = trackingProgress;
   document.getElementById('landedtime').textContent = new Date( updatetime[1]);
   document.getElementById('unloadtime').textContent = new Date(updatetime[2]);
   document.getElementById('collecttime').textContent = new Date(updatetime[3]);
@@ -59,7 +60,8 @@ socket.onmessage = function (event) {
     document.getElementById('collecttime').style.display = 'none';
   }
   
-  document.getElementById('name').textContent = 'Hi ' + name;
+  document.getElementById('name').innerHTML = `<strong>${name}</strong>`;
+
   
   // Add other DOM updates as needed
 };
