@@ -23,6 +23,7 @@ wss.on('connection', function connection(ws) {
     // Here, the 'message' variable is correctly defined
 
     try {
+
       const { flightId, trackType, newState } = JSON.parse(message);
       // Ensure flightId is valid (e.g., numeric) before proceeding
       if (isNaN(flightId)) {
@@ -450,9 +451,22 @@ try{
           const trackType = button.dataset.track;
           const newState = button.getAttribute('data-state');
           const flightId = '${flightId}'; 
-    
-          const data = { flightId, trackType, newState, type: 'data' };
-          socket.send(JSON.stringify(data));
+          const data = { flightId, trackType, newState, type: 'flightupdate' };
+          switch (trackType) {
+            case 'priority':
+              if(${priority_track}!=newState){
+                socket.send(JSON.stringify(data));
+              }
+              break;
+            case 'normal':
+              if(${norm_track}!=newState){
+                socket.send(JSON.stringify(data));
+              }
+              break;
+            default:
+              throw new Error('Invalid trackType');
+          }
+          
         });
       });
     });
