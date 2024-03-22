@@ -33,7 +33,7 @@ wss.on('connection', function connection(ws) {
       handleFlightUpdate(trackType, newState, flightId).then(() => {
         console.log('Update successful');
         // Send a success message to the client if needed
-        ws.send(JSON.stringify({ message: 'Update successful' }));
+        //ws.send(JSON.stringify({ message: 'Update successful' }));
       }).catch(err => {
         console.error('Error updating flight:', err);
         // Send an error message to the client if needed
@@ -328,7 +328,7 @@ async function handleFlightUpdate(trackType, newState, flightId) {
     }
     // Send a message to WebSocket clients about the successful update
     wss.clients.forEach(client => {
-      client.send(JSON.stringify({ message: 'Update successful' }));
+      //client.send(JSON.stringify({ message: 'Update successful' }));
     });
   } catch (error) {
     throw new Error(error.message);
@@ -456,11 +456,13 @@ try{
             case 'priority':
               if(${priority_track}!=newState){
                 socket.send(JSON.stringify(data));
+                window.location.reload();
               }
               break;
             case 'normal':
               if(${norm_track}!=newState){
                 socket.send(JSON.stringify(data));
+                window.location.reload();
               }
               break;
             default:
