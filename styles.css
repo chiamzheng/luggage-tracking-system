@@ -93,5 +93,38 @@ body {
 	position: absolute;
 	left: calc(-50% + 20px);
 	z-index: 0;
+	
 }
+	.image-container {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .image-container img {
+    flex-basis: auto; /* Allow images to grow based on content */
+    max-width: 100%; /* Ensure images don't exceed container width */
+    height: auto; /* Maintain aspect ratio */
+    margin-bottom: 0; /* No margin between images */
+  }
 }
+
+.image-container {
+	display: flex;
+	flex-direction: row;
+	justify-content: center; /* Center align items horizontally */
+	flex-wrap: wrap; /* Allow wrapping to next line if needed */
+	gap: 10px; /* Add space between images */
+	margin-left: -5px; /* Adjust margin to counteract gap */
+	margin-right: -5px; /* Adjust margin to counteract gap */
+  }
+  
+  .image-container img {
+	flex-basis: calc(33.33% - 10px); /* Set initial width for three images per row */
+	flex-shrink: 0;
+	max-width: 100%; /* Ensure images don't exceed container width */
+	height: auto; /* Maintain aspect ratio */
+	margin-bottom: 10px; /* Add margin to the bottom of each image */
+	margin-left: 5px; /* Adjust margin to counteract container margin */
+	margin-right: 5px; /* Adjust margin to counteract container margin */
+  }

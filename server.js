@@ -167,7 +167,12 @@ app.get('/', (req, res) => {
         <button type="submit">Go</button>
       </form>
     </div>
-  
+    <div class="container p-3 mb-2 bg-secondary text-white image-container">
+      <img src="https://www.changiairport.com/content/dam/cag/shop/changi-millionaire/2023/changi-millionaire-shop-carousel-tile-581x387px.jpg">
+      <img src="https://www.changiairport.com/content/dam/cag/shop/promotions/shop-changi-fly-happy/581x387px.jpg">
+      <img src="https://www.changiairport.com/content/dam/cag/shop/changi-first/macallan-harmony-3-collection/changi1stmacallan_ca.com_shop-changi-content-card_581x387.jpg">
+      <img src="https://www.changiairport.com/content/dam/cag/shop/isc-banners/limited-time-only/TR_MarHoliday_2024_581x387.jpg">
+    </div>
     <script src="landingscript.js"></script>
   </body>
   </html>
@@ -243,6 +248,12 @@ app.get('/:passengerId(' + numericPattern + ')', async (req, res) => {//extract 
           </div>
         </div>
       </div>
+      <div class="container p-3 mb-2 bg-secondary text-white image-container">
+      <img src="https://www.changiairport.com/content/dam/cag/shop/changi-millionaire/2023/changi-millionaire-shop-carousel-tile-581x387px.jpg">
+      <img src="https://www.changiairport.com/content/dam/cag/shop/promotions/shop-changi-fly-happy/581x387px.jpg">
+      <img src="https://www.changiairport.com/content/dam/cag/shop/changi-first/macallan-harmony-3-collection/changi1stmacallan_ca.com_shop-changi-content-card_581x387.jpg">
+      <img src="https://www.changiairport.com/content/dam/cag/shop/isc-banners/limited-time-only/TR_MarHoliday_2024_581x387.jpg">
+    </div>
       <script src="script.js"></script>
     </body>
     </html>
