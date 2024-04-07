@@ -208,6 +208,7 @@ app.get('/:passengerId(' + numericPattern + ')', async (req, res) => {//extract 
 
     const { belt_no, [trackingType]: tracking_progress, flight_name, [timeType]:updatetime } = flightInfo;
 
+
     // Generate HTML content
     const htmlContent = `
     <!DOCTYPE html>
@@ -216,11 +217,40 @@ app.get('/:passengerId(' + numericPattern + ')', async (req, res) => {//extract 
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>Flight Tracking</title>
+      <title>Countdown Timer</title>
+      <style>
+        #countdown {
+          font-size: 20px;
+          font-weight: bold;
+        }
+      </style>
+      <title>Redirect Button</title>
+      <style>
+        /* Style the button */
+        #redirectButton {
+          background-color: #4CAF50; /* Green */
+          border: none;
+          color: white;
+          padding: 15px 15px;
+          text-align: center;
+          text-decoration: none;
+          display: inline-block;
+          font-size: 18px;
+          margin: 4px 2px;
+          cursor: pointer;
+          border-radius: 5px;
+        }
+
+        /* Change the button color when hovered */
+        #redirectButton:hover {
+          background-color: #45a049;
+        }
+    </style>
       <link rel="stylesheet" href="/styles.css">
       <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
       <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     </head>
-    <body>
+    <body>  
       <div class="container p-3 mb-2 bg-secondary text-white">
         <h1>Flight Information</h1>
         <div id="flightInfo">
@@ -229,11 +259,12 @@ app.get('/:passengerId(' + numericPattern + ')', async (req, res) => {//extract 
           <p><strong>Belt No:</strong> <span id="beltNo">${belt_no}</span></p>
           <!-- <p><strong>Tracking Stage:</strong> <span id="trackingProgress">${tracking_progress}</span></p> -->
         </div>
+        <div id="countdown" style="display: ${tracking_progress >= 3 ? 'block' : 'none'};" data-tracking-progress="${tracking_progress}"></div>
+        <button id="redirectButton" style="display: none;">Collect Your Points</button>
         <div class="container p-3 mb-2 bg-white text-dark">
           <div class="row justify-content-between">
             <div id="landed" class="col-sm-4 order-tracking ${tracking_progress >= 1 ? 'completed' : ''}">
               <span class="is-complete"></span>
-              
               <p>Landed<br><span id="landedtime" style="display: ${tracking_progress >= 1 ? 'block': 'none'};">${updatetime[1]}</span></p>
             </div>
             <div id="unloaded" class="col-sm-4 order-tracking ${tracking_progress >= 2 ? 'completed' : ''}">
@@ -243,7 +274,6 @@ app.get('/:passengerId(' + numericPattern + ')', async (req, res) => {//extract 
             <div id="ready" class="col-sm-4 order-tracking ${tracking_progress >= 3 ? 'completed' : ''}">
               <span class="is-complete"></span>
               <p>Ready for collection<br><span id="collecttime" style="display: ${tracking_progress >= 3 ? 'block' : 'none'};">${updatetime[3]}</span></p>
-
             </div>
           </div>
         </div>
@@ -255,6 +285,7 @@ app.get('/:passengerId(' + numericPattern + ')', async (req, res) => {//extract 
       <img src="https://www.changiairport.com/content/dam/cag/shop/isc-banners/limited-time-only/TR_MarHoliday_2024_581x387.jpg">
     </div>
       <script src="script.js"></script>
+      
     </body>
     </html>
     `;
